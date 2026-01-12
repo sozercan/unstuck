@@ -89,7 +89,7 @@ func TestPrinter_PrintDiagnosis_Text_Terminating(t *testing.T) {
 				Finalizers: []string{"cert-manager.io/finalizer"},
 			},
 		},
-		Recommendations: []string{"Use terminator plan to remediate"},
+		Recommendations: []string{"Use unstuck plan to remediate"},
 		DiagnosedAt:     time.Now(),
 	}
 

@@ -150,7 +150,7 @@ func (d *NamespaceDetector) buildRecommendations(report *types.DiagnosisReport) 
 	var recs []string
 
 	if report.HasDiscoveryFailures() {
-		recs = append(recs, "Discovery failures detected. CRDs may have been deleted. Use `terminator plan` with --max-escalation=4 --allow-force")
+		recs = append(recs, "Discovery failures detected. CRDs may have been deleted. Use `unstuck plan` with --max-escalation=4 --allow-force")
 	}
 
 	if report.HasBlockers() {
@@ -161,9 +161,9 @@ func (d *NamespaceDetector) buildRecommendations(report *types.DiagnosisReport) 
 			}
 		}
 		if stuckCount > 0 {
-			recs = append(recs, fmt.Sprintf("%d resources are stuck in Terminating. Use `terminator plan namespace %s` to generate remediation steps.", stuckCount, report.Target.Name))
+			recs = append(recs, fmt.Sprintf("%d resources are stuck in Terminating. Use `unstuck plan namespace %s` to generate remediation steps.", stuckCount, report.Target.Name))
 		} else {
-			recs = append(recs, fmt.Sprintf("%d resources have finalizers. Use `terminator plan namespace %s` to see remediation options.", len(report.Blockers), report.Target.Name))
+			recs = append(recs, fmt.Sprintf("%d resources have finalizers. Use `unstuck plan namespace %s` to see remediation options.", len(report.Blockers), report.Target.Name))
 		}
 	}
 

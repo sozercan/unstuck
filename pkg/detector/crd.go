@@ -164,13 +164,13 @@ func (d *CRDDetector) buildRecommendations(report *types.DiagnosisReport, crd *a
 			len(report.InstancesByNS),
 		))
 		recs = append(recs, fmt.Sprintf(
-			"Use `terminator plan crd %s` to generate steps.",
+			"Use `unstuck plan crd %s` to generate steps.",
 			crd.Name,
 		))
 	} else if hasCleanupFinalizer(crd) {
 		recs = append(recs, "CRD has cleanup finalizer but no instances found. May need force removal.")
 		recs = append(recs, fmt.Sprintf(
-			"Use `terminator plan crd %s --max-escalation=3 --allow-force`",
+			"Use `unstuck plan crd %s --max-escalation=3 --allow-force`",
 			crd.Name,
 		))
 	}

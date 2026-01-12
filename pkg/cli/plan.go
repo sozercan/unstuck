@@ -42,16 +42,16 @@ Escalation Levels:
 
 Examples:
   # Generate plan with default max escalation (Level 2)
-  terminator plan namespace cert-manager
+  unstuck plan namespace cert-manager
 
   # Limit to informational only
-  terminator plan namespace cert-manager --max-escalation=0
+  unstuck plan namespace cert-manager --max-escalation=0
 
   # Allow force-level actions in plan
-  terminator plan namespace cert-manager --max-escalation=4 --allow-force
+  unstuck plan namespace cert-manager --max-escalation=4 --allow-force
 
   # Plan for CRD
-  terminator plan crd certificates.cert-manager.io`,
+  unstuck plan crd certificates.cert-manager.io`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: runPlan,
 	}

@@ -34,13 +34,13 @@ Supported target types:
 
 Examples:
   # Diagnose a stuck namespace
-  terminator diagnose namespace cert-manager
+  unstuck diagnose namespace cert-manager
 
   # Diagnose a stuck CRD
-  terminator diagnose crd certificates.cert-manager.io
+  unstuck diagnose crd certificates.cert-manager.io
 
   # Diagnose a specific resource
-  terminator diagnose certificate my-cert -n cert-manager`,
+  unstuck diagnose certificate my-cert -n cert-manager`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: runDiagnose,
 	}

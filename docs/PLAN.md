@@ -1101,8 +1101,8 @@ Required permissions:
     verbs: ["get", "patch"]
 
 Grant with:
-  kubectl create clusterrolebinding terminator-binding \
-    --clusterrole=terminator \
+  kubectl create clusterrolebinding unstuck-binding \
+    --clusterrole=unstuck \
     --user=<your-user>
 ```
 
@@ -1250,8 +1250,8 @@ func isAggregatedAPI(gv schema.GroupVersion) bool {
 - [ ] Uninstall-order best practices guide
 - [ ] Release automation with goreleaser:
   - [ ] GitHub Releases (binary downloads)
-  - [ ] Homebrew tap (`brew install sozercan/tap/terminator`)
-  - [ ] Krew plugin manifest (`kubectl krew install terminator`)
+  - [ ] Homebrew tap (`brew install sozercan/tap/unstuck`)
+  - [ ] Krew plugin manifest (`kubectl krew install unstuck`)
 - [ ] Installation instructions for all methods
 - [ ] CI/CD pipeline (GitHub Actions) — see [CI/CD Configuration](#cicd-configuration)
 
@@ -1340,7 +1340,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -o terminator-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/terminator
+          go build -o unstuck-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/unstuck
 ```
 
 #### Integration Tests with Kind (`integration.yml`)
@@ -1378,8 +1378,8 @@ jobs:
           go-version: '1.22'
           cache: true
 
-      - name: Build terminator
-        run: go build -o bin/terminator ./cmd/terminator
+      - name: Build unstuck
+        run: go build -o bin/unstuck ./cmd/unstuck
 
       - name: Create kind cluster
         uses: helm/kind-action@v1
@@ -1401,7 +1401,7 @@ jobs:
         run: |
           go test -v -tags=integration -timeout=15m ./test/e2e/...
         env:
-          TERMINATOR_BIN: ${{ github.workspace }}/bin/terminator
+          UNSTUCK_BIN: ${{ github.workspace }}/bin/unstuck
           KUBECONFIG: ${{ github.workspace }}/.kube/config
 
       - name: Test CLI - Diagnose healthy namespace
@@ -1514,7 +1514,7 @@ jobs:
 ```yaml
 version: 2
 
-project_name: terminator
+project_name: unstuck
 
 before:
   hooks:
@@ -1522,9 +1522,9 @@ before:
     - go generate ./...
 
 builds:
-  - id: terminator
-    main: ./cmd/terminator
-    binary: terminator
+  - id: unstuck
+    main: ./cmd/unstuck
+    binary: unstuck
     env:
       - CGO_ENABLED=0
     goos:
@@ -1544,7 +1544,7 @@ builds:
       - -X main.date={{.Date}}
 
 archives:
-  - id: terminator
+  - id: unstuck
     format: tar.gz
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
@@ -1568,7 +1568,7 @@ changelog:
       - Merge branch
 
 brews:
-  - name: terminator
+  - name: unstuck
     repository:
       owner: sozercan
       name: homebrew-tap
@@ -1578,9 +1578,9 @@ brews:
     description: "Diagnose and remediate Kubernetes resources stuck in Terminating state"
     license: "Apache-2.0"
     install: |
-      bin.install "terminator"
+      bin.install "unstuck"
     test: |
-      system "#{bin}/terminator", "--version"
+      system "#{bin}/unstuck", "--version"
 ```
 
 ### Krew Plugin Manifest (`.krew.yaml`)
@@ -1589,13 +1589,13 @@ brews:
 apiVersion: krew.googlecontainertools.github.com/v1alpha2
 kind: Plugin
 metadata:
-  name: terminator
+  name: unstuck
 spec:
   version: {{ .TagName }}
   homepage: https://github.com/sozercan/unstuck
   shortDescription: Diagnose and fix stuck Terminating resources
   description: |
-    Terminator diagnoses and remediates Kubernetes resources stuck in 
+    Unstuck diagnoses and remediates Kubernetes resources stuck in 
     Terminating state due to unsatisfiable finalizers, missing controllers, 
     deleted CRDs, or blocking webhooks.
     
@@ -1616,37 +1616,37 @@ spec:
         matchLabels:
           os: linux
           arch: amd64
-      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/terminator_linux_amd64.tar.gz
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_linux_amd64.tar.gz
       sha256: {{ .Sha256.linux_amd64 }}
-      bin: terminator
+      bin: unstuck
     - selector:
         matchLabels:
           os: linux
           arch: arm64
-      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/terminator_linux_arm64.tar.gz
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_linux_arm64.tar.gz
       sha256: {{ .Sha256.linux_arm64 }}
-      bin: terminator
+      bin: unstuck
     - selector:
         matchLabels:
           os: darwin
           arch: amd64
-      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/terminator_darwin_amd64.tar.gz
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_darwin_amd64.tar.gz
       sha256: {{ .Sha256.darwin_amd64 }}
-      bin: terminator
+      bin: unstuck
     - selector:
         matchLabels:
           os: darwin
           arch: arm64
-      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/terminator_darwin_arm64.tar.gz
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_darwin_arm64.tar.gz
       sha256: {{ .Sha256.darwin_arm64 }}
-      bin: terminator
+      bin: unstuck
     - selector:
         matchLabels:
           os: windows
           arch: amd64
-      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/terminator_windows_amd64.zip
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_windows_amd64.zip
       sha256: {{ .Sha256.windows_amd64 }}
-      bin: terminator.exe
+      bin: unstuck.exe
 ```
 
 ### Test Fixtures for Integration Tests
@@ -1731,7 +1731,7 @@ lint:
 
 # Build
 build:
-	go build -o bin/terminator ./cmd/terminator
+	go build -o bin/unstuck ./cmd/unstuck
 
 # Create test cluster
 test-cluster:
@@ -1787,7 +1787,7 @@ func TestE2E_DiagnoseStuckNamespace(t *testing.T) {
     setupStuckNamespace(t)
     
     // Execute diagnosis
-    output := runTerminator(t, "diagnose", "namespace", "stuck-ns", "-o", "json")
+    output := runUnstuck(t, "diagnose", "namespace", "stuck-ns", "-o", "json")
     
     // Verify
     var report DiagnosisReport

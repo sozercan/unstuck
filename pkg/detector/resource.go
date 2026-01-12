@@ -152,12 +152,12 @@ func (d *ResourceDetector) buildRecommendations(report *types.DiagnosisReport, k
 	if len(report.Finalizers) > 0 {
 		if namespace != "" {
 			recs = append(recs, fmt.Sprintf(
-				"Use `terminator plan %s %s -n %s` to generate remediation steps.",
+				"Use `unstuck plan %s %s -n %s` to generate remediation steps.",
 				strings.ToLower(kind), name, namespace,
 			))
 		} else {
 			recs = append(recs, fmt.Sprintf(
-				"Use `terminator plan %s %s` to generate remediation steps.",
+				"Use `unstuck plan %s %s` to generate remediation steps.",
 				strings.ToLower(kind), name,
 			))
 		}

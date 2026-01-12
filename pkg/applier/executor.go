@@ -177,11 +177,16 @@ func (e *Executor) Verify(ctx context.Context, action types.Action) (bool, error
 }
 
 // verifyNoFinalizers checks that a resource has no finalizers
+// If the resource is not found, that means finalizers were removed and it was deleted (success)
 func (e *Executor) verifyNoFinalizers(ctx context.Context, target types.ResourceRef) (bool, error) {
 	switch target.Kind {
 	case "Namespace":
 		ns, err := e.client.Clientset.CoreV1().Namespaces().Get(ctx, target.Name, metav1.GetOptions{})
 		if err != nil {
+			// If resource is not found, finalizers were removed and it was deleted - success
+			if strings.Contains(err.Error(), "not found") {
+				return true, nil
+			}
 			return false, err
 		}
 		return len(ns.Finalizers) == 0, nil
@@ -189,6 +194,10 @@ func (e *Executor) verifyNoFinalizers(ctx context.Context, target types.Resource
 	case "CustomResourceDefinition":
 		crd, err := e.client.ApiExtensions.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, target.Name, metav1.GetOptions{})
 		if err != nil {
+			// If resource is not found, finalizers were removed and it was deleted - success
+			if strings.Contains(err.Error(), "not found") {
+				return true, nil
+			}
 			return false, err
 		}
 		return len(crd.Finalizers) == 0, nil
@@ -200,6 +209,10 @@ func (e *Executor) verifyNoFinalizers(ctx context.Context, target types.Resource
 		}
 		obj, err := e.client.Dynamic.Resource(gvr).Namespace(target.Namespace).Get(ctx, target.Name, metav1.GetOptions{})
 		if err != nil {
+			// If resource is not found, finalizers were removed and it was deleted - success
+			if strings.Contains(err.Error(), "not found") {
+				return true, nil
+			}
 			return false, err
 		}
 		finalizers, _, _ := unstructured.NestedStringSlice(obj.Object, "metadata", "finalizers")
