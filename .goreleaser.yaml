@@ -62,7 +62,7 @@ brews:
     folder: Formula
     homepage: "https://github.com/sozercan/unstuck"
     description: "Diagnose and remediate Kubernetes resources stuck in Terminating state"
-    license: "Apache-2.0"
+    license: "MIT"
     install: |
       bin.install "unstuck"
     test: |
