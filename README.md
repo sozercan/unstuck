@@ -14,24 +14,6 @@ A CLI tool to diagnose and remediate Kubernetes resources stuck in `Terminating`
 
 ## Installation
 
-### Homebrew
-
-```bash
-brew install sozercan/tap/unstuck
-```
-
-### Krew (kubectl plugin)
-
-```bash
-kubectl krew install unstuck
-```
-
-### Binary Download
-
-Download the latest release from [GitHub Releases](https://github.com/sozercan/unstuck/releases).
-
-### From Source
-
 ```bash
 go install github.com/sozercan/unstuck/cmd/unstuck@latest
 ```
