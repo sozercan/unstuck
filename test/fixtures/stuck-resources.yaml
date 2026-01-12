@@ -1,0 +1,17 @@
+apiVersion: example.com/v1
+kind: TestResource
+metadata:
+  name: stuck-resource-1
+  finalizers:
+    - example.com/test-finalizer
+spec:
+  data: "This resource will get stuck"
+---
+apiVersion: example.com/v1
+kind: TestResource
+metadata:
+  name: stuck-resource-2
+  finalizers:
+    - example.com/test-finalizer
+spec:
+  data: "This resource will also get stuck"

@@ -1,0 +1,61 @@
+apiVersion: krew.googlecontainertools.github.com/v1alpha2
+kind: Plugin
+metadata:
+  name: unstuck
+spec:
+  version: {{ .TagName }}
+  homepage: https://github.com/sozercan/unstuck
+  shortDescription: Diagnose and fix stuck Terminating resources
+  description: |
+    Unstuck diagnoses and remediates Kubernetes resources stuck in 
+    Terminating state due to unsatisfiable finalizers, missing controllers, 
+    deleted CRDs, or blocking webhooks.
+    
+    Features:
+    - Diagnose stuck namespaces, CRDs, and resources
+    - Generate remediation plans with escalating risk levels
+    - Execute fixes with dry-run support and audit logging
+    
+    Usage:
+      kubectl unstuck diagnose namespace <name>
+      kubectl unstuck plan namespace <name>
+      kubectl unstuck apply namespace <name> --dry-run
+  caveats: |
+    This plugin can remove finalizers from resources, which may cause
+    external resources to be orphaned. Use with caution.
+  platforms:
+    - selector:
+        matchLabels:
+          os: linux
+          arch: amd64
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_linux_amd64.tar.gz
+      sha256: {{ .Sha256.linux_amd64 }}
+      bin: unstuck
+    - selector:
+        matchLabels:
+          os: linux
+          arch: arm64
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_linux_arm64.tar.gz
+      sha256: {{ .Sha256.linux_arm64 }}
+      bin: unstuck
+    - selector:
+        matchLabels:
+          os: darwin
+          arch: amd64
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_darwin_amd64.tar.gz
+      sha256: {{ .Sha256.darwin_amd64 }}
+      bin: unstuck
+    - selector:
+        matchLabels:
+          os: darwin
+          arch: arm64
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_darwin_arm64.tar.gz
+      sha256: {{ .Sha256.darwin_arm64 }}
+      bin: unstuck
+    - selector:
+        matchLabels:
+          os: windows
+          arch: amd64
+      uri: https://github.com/sozercan/unstuck/releases/download/{{ .TagName }}/unstuck_windows_amd64.zip
+      sha256: {{ .Sha256.windows_amd64 }}
+      bin: unstuck.exe

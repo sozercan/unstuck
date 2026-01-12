@@ -1,0 +1,98 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  integration-tests:
+    name: Integration Tests (k8s ${{ matrix.k8s-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        k8s-version:
+          - v1.30.4
+          - v1.31.0
+          - v1.32.0
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache: true
+
+      - name: Build unstuck
+        run: go build -o bin/unstuck ./cmd/unstuck
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: unstuck-test
+          node_image: kindest/node:${{ matrix.k8s-version }}
+          wait: 120s
+
+      - name: Wait for cluster ready
+        run: |
+          kubectl wait --for=condition=Ready nodes --all --timeout=120s
+          kubectl cluster-info
+
+      - name: Install test CRDs
+        run: |
+          kubectl apply -f test/fixtures/crds/
+
+      - name: Run integration tests
+        run: |
+          go test -v -tags=integration -timeout=15m ./test/e2e/...
+        env:
+          UNSTUCK_BIN: ${{ github.workspace }}/bin/unstuck
+          KUBECONFIG: ${{ github.workspace }}/.kube/config
+
+      - name: Test CLI - Diagnose healthy namespace
+        run: |
+          ./bin/unstuck diagnose namespace default
+          # Should exit 0 with "healthy" status
+
+      - name: Test CLI - Diagnose non-existent namespace
+        run: |
+          ! ./bin/unstuck diagnose namespace does-not-exist 2>&1
+
+      - name: Create stuck namespace scenario
+        run: |
+          # Create namespace with test resources
+          kubectl create namespace test-stuck
+          kubectl apply -f test/fixtures/stuck-resources.yaml -n test-stuck
+          
+          # Delete namespace (will get stuck)
+          kubectl delete namespace test-stuck --wait=false
+          
+          # Wait for namespace to be terminating
+          sleep 5
+          kubectl get namespace test-stuck -o jsonpath='{.status.phase}' | grep -q Terminating
+
+      - name: Test CLI - Diagnose stuck namespace
+        run: |
+          ./bin/unstuck diagnose namespace test-stuck -o json | jq .
+          ./bin/unstuck diagnose namespace test-stuck | grep -q "Terminating"
+
+      - name: Cleanup - Force delete test namespace
+        if: always()
+        run: |
+          # Remove finalizers from test resources
+          kubectl get testresources -n test-stuck -o name 2>/dev/null | xargs -I {} kubectl patch {} -n test-stuck -p '{"metadata":{"finalizers":null}}' --type=merge || true
+          kubectl delete namespace test-stuck --wait=false --ignore-not-found || true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs-${{ matrix.k8s-version }}
+          path: |
+            /tmp/unstuck-*.log
