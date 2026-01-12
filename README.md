@@ -5,6 +5,12 @@
 
 A CLI tool to diagnose and remediate Kubernetes resources stuck in `Terminating` state due to unsatisfiable finalizers, missing controllers, deleted CRDs, or blocking webhooks.
 
+## Motivation
+
+If you've ever run `kubectl delete namespace` and watched it hang forever, you know the frustration. The namespace sits in `Terminating` state, and you're left searching Stack Overflow for arcane `kubectl` commands involving finalizers, JSON patches, and API proxies.
+
+I got tired of copy-pasting the same commands over and over, so I built `unstuck` to automate the diagnosis and remediation process. Instead of manually hunting down stuck resources and crafting patch commands, you can now run a single command to understand what's wrong and fix it safely.
+
 ## Features
 
 - **Diagnose** stuck namespaces, CRDs, and resources
