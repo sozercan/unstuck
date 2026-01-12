@@ -68,10 +68,8 @@ jobs:
           # Create namespace with test resources
           kubectl create namespace test-stuck
           kubectl apply -f test/fixtures/stuck-resources.yaml -n test-stuck
-          
           # Delete namespace (will get stuck)
           kubectl delete namespace test-stuck --wait=false
-          
           # Wait for namespace to be terminating
           sleep 5
           kubectl get namespace test-stuck -o jsonpath='{.status.phase}' | grep -q Terminating
